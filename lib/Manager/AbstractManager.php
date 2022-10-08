@@ -30,15 +30,25 @@ abstract class AbstractManager {
         return strtolower(end($tmp));
     }
 
-    protected function readOne(string $class, int $id) {
-        $query = "SELECT * FROM " . $this->classToTable($class) . " WHERE id = :id";
+    protected function readOne(string $class, int $id = null, array $criteria = []) {
+        var_dump($criteria);
+        $query = "SELECT * FROM " . $this->classToTable($class); // . " WHERE id = :id";
+        // J'edite ma requete pour prendre en compte la clasue XWHERE avec les criteria
+        if (isset($criteria)) {
+            $query .= " WHERE ";
+            foreach($criteria as $key => $value) {
+                $query .= $key . " = " . $value;
+            }
+        }
         $stmt = $this->executeQuery($query, [ 'id' => $id ]);
         $stmt->setFetchMode(\PDO::FETCH_CLASS, $class);
         return $stmt->fetch();
     }
 
-    protected function readMany(string $class) {
+    protected function readMany(string $class, array $criteria = [], $order = []) {
         $query = "SELECT * FROM " . $this->classToTable($class);
+        // J'edite ma requete pour prendre en compte la clasue XWHERE avec les criteria
+        // ORDER BY
         $stmt = $this->executeQuery($query);
         $stmt->setFetchMode(\PDO::FETCH_CLASS, $class);
         return $stmt->fetchAll();
